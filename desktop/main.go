@@ -17,8 +17,10 @@ func main() {
 	//fmt.Println("下面这些人还没投票")
 
 	// 根据人员信息与提交信息获取所有人员信息
-	persons := core.GetNotSubmitPersons(personInfoFilename, submissionFilename)
-
+	persons, err := core.GetNotSubmitPersons(personInfoFilename, submissionFilename)
+	if err != nil {
+		panic(err)
+	}
 	for _, person := range persons {
 		// 输出未提交人的名字
 		//fmt.Println(person.Name)

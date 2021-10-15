@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"io/ioutil"
 	"strings"
 )
@@ -25,7 +26,7 @@ func InitPersonInfo(filename string) (p personInfos, err error) {
 	return personInfos{Filename: filename, Persons: persons}, nil
 }
 
-func (p *personInfos) GetPersonNotSubmit(submission string) {
+func (p *personInfos) StatisticPersonNotSubmit(submission string) {
 	for index, person := range p.Persons {
 		if strings.Contains(submission, person.Name) {
 			person.Submit = true
@@ -50,26 +51,22 @@ const (
 	submissionRootDir = "./desktop/static/submission/"
 )
 
-func GetNotSubmitPersons(personInfoFilename, submissionFilename string) (persons []Person){
+func GetNotSubmitPersons(personInfoFilename, submissionFilename string) (persons []Person, err error){
 	personToSubmit, err := InitPersonInfo(personInfoRootDir + personInfoFilename)
 	if err != nil {
-		panic(err.Error())
+		return nil, fmt.Errorf(err.Error())
 	}
 	submission, err :=  ioutil.ReadFile(submissionRootDir + submissionFilename)
 	if err != nil {
-		panic("文件打开错误" + err.Error())
+		return nil, fmt.Errorf("文件打开错误" + err.Error())
 	}
-	personToSubmit.Statistic(string(submission))
+	personToSubmit.StatisticPersonNotSubmit(string(submission))
 	for _, person := range personToSubmit.Persons{
 		if !person.Submit {
 			persons = append(persons, person)
 		}
 	}
-	return persons
-}
-
-func (p personInfos) Statistic(submission string) {
-	p.GetPersonNotSubmit(submission)
+	return persons, nil
 }
 
 func (p *Person) MarkSubmit() {
