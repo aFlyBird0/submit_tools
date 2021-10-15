@@ -1,6 +1,7 @@
 package core
 
 import (
+	"io/ioutil"
 	"strings"
 )
 
@@ -41,6 +42,30 @@ func (p *personInfos) GetPersonNotSubmit(submission string) {
 			}
 		}
 	}
+}
+
+
+const (
+	personInfoRootDir = "./desktop/static/list/"
+	submissionRootDir = "./desktop/static/submission/"
+)
+
+func GetNotSubmitPersons(personInfoFilename, submissionFilename string) (persons []Person){
+	personToSubmit, err := InitPersonInfo(personInfoRootDir + personInfoFilename)
+	if err != nil {
+		panic(err.Error())
+	}
+	submission, err :=  ioutil.ReadFile(submissionRootDir + submissionFilename)
+	if err != nil {
+		panic("文件打开错误" + err.Error())
+	}
+	personToSubmit.Statistic(string(submission))
+	for _, person := range personToSubmit.Persons{
+		if !person.Submit {
+			persons = append(persons, person)
+		}
+	}
+	return persons
 }
 
 func (p personInfos) Statistic(submission string) {
