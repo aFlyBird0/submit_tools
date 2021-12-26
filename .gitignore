@@ -1,2 +1,5 @@
 /desktop/static/
 /.idea/
+
+# 隐私文件
+**/secret/

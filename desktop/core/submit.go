@@ -34,7 +34,7 @@ func (p *personInfos) StatisticPersonNotSubmit(submission string) {
 			//fmt.Printf("找到了!%s\n", person.Name)
 			continue
 		}
-		for _, alia := range person.Alias{
+		for _, alia := range person.Alias {
 			if alia != "" && strings.Contains(submission, alia) {
 				person.Submit = true
 				p.Persons[index] = person
@@ -45,23 +45,22 @@ func (p *personInfos) StatisticPersonNotSubmit(submission string) {
 	}
 }
 
-
 const (
 	personInfoRootDir = "./desktop/static/list/"
 	submissionRootDir = "./desktop/static/submission/"
 )
 
-func GetNotSubmitPersons(personInfoFilename, submissionFilename string) (persons []Person, err error){
+func GetNotSubmitPersons(personInfoFilename, submissionFilename string) (persons []Person, err error) {
 	personToSubmit, err := InitPersonInfo(personInfoRootDir + personInfoFilename)
 	if err != nil {
 		return nil, fmt.Errorf(err.Error())
 	}
-	submission, err :=  ioutil.ReadFile(submissionRootDir + submissionFilename)
+	submission, err := ioutil.ReadFile(submissionRootDir + submissionFilename)
 	if err != nil {
 		return nil, fmt.Errorf("文件打开错误" + err.Error())
 	}
 	personToSubmit.StatisticPersonNotSubmit(string(submission))
-	for _, person := range personToSubmit.Persons{
+	for _, person := range personToSubmit.Persons {
 		if !person.Submit {
 			persons = append(persons, person)
 		}
