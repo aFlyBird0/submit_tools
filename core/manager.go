@@ -14,11 +14,10 @@ type SubmissionLoader interface {
 	LoadSubmission() ([]*Submission, error)
 }
 
-type Matcher func(wants []*ToSubmit, givens []*Submission) []int
+type Matcher func(wants []*ToSubmit, givens []*Submission) ([]int, []int)
 
-// DefaultMatch 匹配待提交列表和已提交列表，返回已提交列表的下标数组
-// todo 现在是抢占式的匹配，一个匹配上另外一个就不匹了，实现一个非抢占式的匹配，并提示岐义
-var DefaultMatch = func(wants []*ToSubmit, givens []*Submission) (submittedIndex []int) {
+// DefaultMatch 匹配待提交列表和已提交列表，返回已提交列表的下标数组和可能有歧义的下标数组
+var DefaultMatch = func(wants []*ToSubmit, givens []*Submission) (submittedIndex, confusedIndex []int) {
 	if len(givens) == 0 {
 		return
 	}
@@ -43,16 +42,17 @@ var DefaultMatch = func(wants []*ToSubmit, givens []*Submission) (submittedIndex
 	matched := make([]bool, len(givens))
 	for toSubmitIndex, want := range wants {
 		match := false
+		confuse := false
 		for _, alia := range want.EffectiveAlias() {
 			alia := strings.TrimSpace(alia)
 			if alia == "" {
 				continue
 			}
 			for j, giv := range givens {
-				if matched[j] {
-					continue
-				}
 				if strings.Contains(giv.Sub, alia) {
+					if matched[j] {
+						confuse = true
+					}
 					matched[j] = true
 					match = true
 					submittedIndex = append(submittedIndex, toSubmitIndex)
@@ -60,6 +60,9 @@ var DefaultMatch = func(wants []*ToSubmit, givens []*Submission) (submittedIndex
 				}
 			}
 			if match {
+				if confuse {
+					confusedIndex = append(confusedIndex, toSubmitIndex)
+				}
 				break
 			}
 		}
@@ -95,7 +98,7 @@ func (m *manager) combineSubmissions() (subs []*Submission, err error) {
 	return
 }
 
-func (m *manager) GetUnSubmitted() (unSubmitted []*ToSubmit, errs []error) {
+func (m *manager) GetUnSubmitted() (unSubmitted []*ToSubmit, confused []*ToSubmit, errs []error) {
 
 	// 获取待提交列表和已提交信息
 	tos, err1 := m.combineTos()
@@ -118,10 +121,15 @@ func (m *manager) GetUnSubmitted() (unSubmitted []*ToSubmit, errs []error) {
 		return
 	}
 
-	submitted := m.Match(tos, sbs)
+	submitted, confusedIndex := m.Match(tos, sbs)
 	for i, to := range tos {
 		if !in(i, submitted) {
 			unSubmitted = append(unSubmitted, to)
+		}
+	}
+	for i, to := range tos {
+		if in(i, confusedIndex) {
+			confused = append(confused, to)
 		}
 	}
 	return

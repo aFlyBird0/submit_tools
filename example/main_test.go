@@ -25,12 +25,22 @@ func TestAsMain(t *testing.T) {
 	manager.SetToSubmit(g)
 	manager.SetSubmission(submission)
 	manager.SetMatch(core.DefaultMatch)
-	if unSubs, err := manager.GetUnSubmitted(); err == nil {
-		fmt.Printf("共有%d人未提交\n", len(unSubs))
-		for _, unSub := range unSubs {
-			fmt.Println(unSub)
-		}
+	unSubmitted, confused, errs := manager.GetUnSubmitted()
+	if len(errs) != 0 {
+		t.Errorf("errs: %v", errs)
+	}
+	fmt.Println("未提交人员名单:")
+	if len(unSubmitted) == 0 {
+		fmt.Println("所有人都提交啦！")
 	} else {
-		t.Error(err)
+		for _, un := range unSubmitted {
+			fmt.Println(un.String())
+		}
+	}
+	if len(confused) > 0 {
+		fmt.Println("以下人员提交情况不确定：")
+		for _, c := range confused {
+			fmt.Println(c.String())
+		}
 	}
 }
