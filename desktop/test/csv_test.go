@@ -2,8 +2,8 @@ package test
 
 import (
 	"fmt"
+	"github.com/aFlyBird0/submit_tools/desktop/core"
 	"strings"
-	"submit_tools/desktop/core"
 	"testing"
 )
 

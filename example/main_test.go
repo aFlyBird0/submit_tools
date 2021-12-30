@@ -2,7 +2,7 @@ package example
 
 import (
 	"fmt"
-	"submit_tools/core"
+	"github.com/aFlyBird0/submit_tools/core"
 	"testing"
 )
 

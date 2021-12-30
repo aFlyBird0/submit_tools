@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"submit_tools/desktop/core"
+	"github.com/aFlyBird0/submit_tools/desktop/core"
 )
 
 func main() {
